@@ -1,0 +1,26 @@
+spring:
+  h2:
+    console:
+      enabled: true
+      path: /db
+  batch:
+    job:
+      enabled: false
+  main:
+    allow-bean-definition-overriding: true
+
+database:
+  driverClassName: org.h2.Driver
+  url: jdbc:h2:~/springdb/DB_CLOSE_ON_EXIT=FALSE
+  username: fiap
+  password: fiap
+
+hibernate:
+  dialect: org.hibernate.dialect.H2Dialect
+  show_sql: true
+  format_sql: true
+  hbm2ddl.auto: create-drop
+
+
+file:
+  input: classpath:students_pre_registration.txt
