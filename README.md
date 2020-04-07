@@ -85,7 +85,7 @@ Para realizar o teste da aplicação via interface gráfica do swagger, você de
 
 ## Trabalhos futuros: 
 - Desenvolver telas para facilitar o trabalho dos operadores.
-- Desenvolver um cadastro de alunos assim como um cadastro de cartões de crédito, e refatorar o gerenciamento de associação de cartão a um aluno para tratar apenas com os identificadores. 
+- Desenvolver um cadastro de alunos assim como um cadastro de cartões de crédito isoladamente, e refatorar o gerenciamento de associação de cartão a um aluno para tratar apenas com os identificadores. 
 - Refinar os fluxos e desenvolver as validações adequadas de persistência.
 
 ## Links:

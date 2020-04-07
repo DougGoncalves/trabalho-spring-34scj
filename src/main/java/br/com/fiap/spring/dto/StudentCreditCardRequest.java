@@ -1,5 +1,7 @@
 package br.com.fiap.spring.dto;
 
+import static br.com.fiap.spring.annotations.CardValidator.CardValidation;
+
 import javax.validation.constraints.NotNull;
 
 public class StudentCreditCardRequest {
@@ -13,6 +15,7 @@ public class StudentCreditCardRequest {
     @NotNull
     private String course;
 
+    @CardValidation
     @NotNull
     private String cardNumber;
 
