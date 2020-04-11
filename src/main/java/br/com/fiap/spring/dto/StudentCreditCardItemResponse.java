@@ -10,9 +10,6 @@ public class StudentCreditCardItemResponse {
     private String expirationDate;
     private Integer verificationCode;
 
-    public StudentCreditCardItemResponse() {
-    }
-
     public StudentCreditCardItemResponse(Integer id, String registration, String name, String course, String cardNumber,
                                          String expirationDate, Integer verificationCode) {
         this.id = id;

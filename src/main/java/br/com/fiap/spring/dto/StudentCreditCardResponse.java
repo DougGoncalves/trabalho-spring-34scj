@@ -7,14 +7,14 @@ public class StudentCreditCardResponse {
     private Boolean hasNext;
     private Integer pageNumber;
     private Integer totalPages;
-    private List<StudentCreditCardItemResponse> students;
+    private List<StudentCreditCardItemResponse> studentsCreditCard;
 
     public StudentCreditCardResponse(Boolean hasNext, Integer pageNumber, Integer totalPages,
-                                     List<StudentCreditCardItemResponse> students) {
+                                     List<StudentCreditCardItemResponse> studentsCreditCard) {
         this.hasNext = hasNext;
         this.pageNumber = pageNumber;
         this.totalPages = totalPages;
-        this.students = students;
+        this.studentsCreditCard = studentsCreditCard;
     }
 
     public Boolean getHasNext() {
@@ -41,11 +41,11 @@ public class StudentCreditCardResponse {
         this.totalPages = totalPages;
     }
 
-    public List<StudentCreditCardItemResponse> getStudents() {
-        return students;
+    public List<StudentCreditCardItemResponse> getStudentsCreditCard() {
+        return studentsCreditCard;
     }
 
-    public void setStudents(List<StudentCreditCardItemResponse> students) {
-        this.students = students;
+    public void setStudentsCreditCard(List<StudentCreditCardItemResponse> studentsCreditCard) {
+        this.studentsCreditCard = studentsCreditCard;
     }
 }

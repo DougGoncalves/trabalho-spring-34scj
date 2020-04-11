@@ -43,7 +43,6 @@ public class StudentCardController {
 
     private static final int HTTP_STATUS_OK = 200;
     private static final int HTTP_STATUS_CREATED = 201;
-    private static final int HTTP_STATUS_ACCEPTED = 202;
     private static final int HTTP_STATUS_NO_CONTENT = 204;
     private static final int PAGE_SIZE = 10;
 
@@ -58,8 +57,8 @@ public class StudentCardController {
                     response = StudentCreditCardResponse[].class)
     })
     @GetMapping(produces = "application/json", headers = "Accept=application/json" )
-    public ResponseEntity<StudentCreditCardResponse> getAllStudents(@RequestParam("page") int page,
-                                                                    @RequestParam("size") int size){
+    public ResponseEntity<StudentCreditCardResponse> getAllStudentsCreditCard(@RequestParam("page") int page,
+                                                                              @RequestParam("size") int size){
         LOGGER.info("Getting students ... ");
 
         List<StudentCreditCardItemResponse> studentCreditCardItemResponse = new ArrayList<>();
@@ -77,9 +76,9 @@ public class StudentCardController {
                     response = StudentCreditCardResponse.class)
     })
     @GetMapping(value = "/{id}", produces = "application/json", headers = "Accept=application/json" )
-    public ResponseEntity<StudentCreditCardItemResponse> getStudentById(@PathVariable("id") Integer id){
+    public ResponseEntity<StudentCreditCardItemResponse> getStudentCreditCardById(@PathVariable("id") Integer id){
         LOGGER.info("Getting a specific student ... ");
-        return ResponseEntity.ok(toStudentResponse(studentCreditCardService.getStudentsCreditCardById(id)));
+        return ResponseEntity.ok(toStudentResponse(studentCreditCardService.getStudentCreditCardById(id)));
     }
 
     @ApiOperation(value = "Excluir um estudante e os e dados do seu cartão")
@@ -87,9 +86,9 @@ public class StudentCardController {
             @ApiResponse(code = HTTP_STATUS_NO_CONTENT, message = "Dados do cartão do estudante excluído")
     })
     @DeleteMapping(value = "/{id}", produces = "application/json", headers = "Accept=application/json" )
-    public ResponseEntity<?> deleteStudent(@PathVariable("id") Integer id){
+    public ResponseEntity<?> deleteStudentCreditCard(@PathVariable("id") Integer id){
         LOGGER.info("Deleting a student credit-card information ... ");
-        studentCreditCardService.deleteStudentsCreditCard(id);
+        studentCreditCardService.deleteStudentCreditCard(id);
         return ResponseEntity.noContent().build();
     }
 
@@ -98,10 +97,10 @@ public class StudentCardController {
             @ApiResponse(code = HTTP_STATUS_NO_CONTENT, message = "Dados do cartão do estudante atualizados")
     })
     @PutMapping(value = "/{id}", produces = "application/json", headers = "Accept=application/json" )
-    public ResponseEntity<?> updateStudent(@PathVariable("id") Integer id,
-                                           @Valid @RequestBody StudentCreditCardRequest studentCreditCardRequest){
+    public ResponseEntity<?> updateStudentCreditCard(@PathVariable("id") Integer id,
+                                                     @Valid @RequestBody StudentCreditCardRequest studentCreditCardRequest){
         LOGGER.info("Updating a specific student ... ");
-        studentCreditCardService.updateStudentsCreditCard(id, studentCreditCardRequest);
+        studentCreditCardService.updateStudentCreditCard(id, studentCreditCardRequest);
 
         return ResponseEntity.noContent().build();
     }
@@ -111,10 +110,10 @@ public class StudentCardController {
             @ApiResponse(code = HTTP_STATUS_CREATED, message = "Associação realizada")
     })
     @PostMapping(produces = "application/json", headers = "Accept=application/json" )
-    public ResponseEntity<StudentCreditCardItemResponse> createStudent(@Valid @RequestBody StudentCreditCardRequest studentCreditCardRequest){
+    public ResponseEntity<StudentCreditCardItemResponse> createStudentCreditCard(@Valid @RequestBody StudentCreditCardRequest studentCreditCardRequest){
         LOGGER.info("Creating the association between student and your credit card ... ");
 
-        StudentCreditCard student = studentCreditCardService.createStudentsCreditCard(studentCreditCardRequest);
+        StudentCreditCard student = studentCreditCardService.createStudentCreditCard(studentCreditCardRequest);
 
         return ResponseEntity
                 .created(URI.create(String.format("%s/%s", "/spring/v1/student/credit-card", student.getId())))

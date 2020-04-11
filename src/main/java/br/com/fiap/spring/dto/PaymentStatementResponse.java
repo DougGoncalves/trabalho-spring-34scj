@@ -13,9 +13,6 @@ public class PaymentStatementResponse {
     private String creationDate;
     private String updateDate;
 
-    public PaymentStatementResponse() {
-    }
-
     public PaymentStatementResponse(Integer id, Integer orderId, BigDecimal totalOrderAmount, String status,
                                     String creationDate, String updateDate) {
         this.id = id;

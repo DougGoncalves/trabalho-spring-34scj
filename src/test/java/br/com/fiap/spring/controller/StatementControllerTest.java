@@ -1,30 +1,22 @@
 package br.com.fiap.spring.controller;
 
-import br.com.fiap.spring.advice.RestExceptionHandler;
-import br.com.fiap.spring.dto.PaymentStatementResponse;
 import br.com.fiap.spring.entity.Payment;
 import br.com.fiap.spring.enums.PaymentStatus;
 import br.com.fiap.spring.service.PaymentService;
-import com.google.gson.Gson;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-import org.springframework.web.method.HandlerMethod;
-import org.springframework.web.method.annotation.ExceptionHandlerMethodResolver;
-import org.springframework.web.servlet.mvc.method.annotation.ExceptionHandlerExceptionResolver;
-import org.springframework.web.servlet.mvc.method.annotation.ServletInvocableHandlerMethod;
-
-import java.lang.reflect.Method;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Collections;
+
+import static br.com.fiap.spring.controller.config.RestExceptionHandlerConfig.createExceptionResolver;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -52,17 +44,6 @@ public class StatementControllerTest {
                     chain.doFilter(request, response);
                 }))
                 .build();
-    }
-
-    private ExceptionHandlerExceptionResolver createExceptionResolver() {
-        ExceptionHandlerExceptionResolver exceptionResolver = new ExceptionHandlerExceptionResolver() {
-            protected ServletInvocableHandlerMethod getExceptionHandlerMethod(HandlerMethod handlerMethod, Exception exception) {
-                Method method = new ExceptionHandlerMethodResolver(RestExceptionHandler.class).resolveMethod(exception);
-                return new ServletInvocableHandlerMethod(new RestExceptionHandler(), method);
-            }
-        };
-        exceptionResolver.afterPropertiesSet();
-        return exceptionResolver;
     }
 
     private static Integer ORDER_ID = 1;

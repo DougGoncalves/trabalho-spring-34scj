@@ -1,5 +1,7 @@
 package br.com.fiap.spring.controller;
 
+import br.com.fiap.spring.advice.exceptions.PreRegistrationFailedException;
+import br.com.fiap.spring.advice.exceptions.StudentCreditCardConflictException;
 import br.com.fiap.spring.dto.CreditCardRequest;
 import br.com.fiap.spring.dto.PaymentRequest;
 import br.com.fiap.spring.dto.PaymentResponse;
@@ -37,11 +39,13 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+import static br.com.fiap.spring.controller.config.RestExceptionHandlerConfig.createExceptionResolver;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.junit.Assert.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -57,9 +61,15 @@ public class PaymentControllerTest {
     private PaymentController paymentController;
 
     @Before
-    public void setUp(){
+    public void setUp() {
         MockitoAnnotations.initMocks(this);
-        mvc = MockMvcBuilders.standaloneSetup(paymentController).build();
+        mvc = MockMvcBuilders.standaloneSetup(paymentController)
+                .setHandlerExceptionResolvers(createExceptionResolver())
+                .addFilter(((request, response, chain) -> {
+                    response.setCharacterEncoding("UTF-8");
+                    chain.doFilter(request, response);
+                }))
+                .build();
     }
 
     private static Integer ORDER_ID = 1;
@@ -87,6 +97,23 @@ public class PaymentControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id", is(GENERIC_ID)))
                 .andExpect(jsonPath("$.status", is(PaymentStatus.APPROVED.name())));
+    }
 
+    @Test
+    public void shouldReturnConflictWhenProcessAStudentCreditCardPayment() throws Exception {
+        PaymentRequest paymentRequest = new PaymentRequest(ORDER_ID, TOTAL_ORDER_AMOUNT, STUDENT_REGISTRATION, CREDIT_CARD);
+
+        when(paymentService.processStudentCreditCardPayment(any(PaymentRequest.class)))
+                .thenThrow(StudentCreditCardConflictException.class);
+
+        MockHttpServletRequestBuilder request = MockMvcRequestBuilders
+                .post("/spring/v1/payment")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(new Gson().toJson(paymentRequest));
+
+        ResultActions resultActions = mvc.perform(request);
+
+        resultActions.andExpect(status().isConflict());
+        assertThat(resultActions.andReturn().getResponse().getContentAsString(), containsString("message"));
     }
 }

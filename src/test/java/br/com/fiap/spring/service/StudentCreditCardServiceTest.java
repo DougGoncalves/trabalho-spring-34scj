@@ -15,9 +15,6 @@ import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.JobParametersInvalidException;
 import org.springframework.batch.core.launch.JobLauncher;
-import org.springframework.batch.core.repository.JobExecutionAlreadyRunningException;
-import org.springframework.batch.core.repository.JobInstanceAlreadyCompleteException;
-import org.springframework.batch.core.repository.JobRestartException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -91,14 +88,14 @@ public class StudentCreditCardServiceTest {
 
 		when(studentCreditCardRepository.findById(GENERIC_ID)).thenReturn(Optional.of(studentCreditCard));
 
-		assertEquals(GENERIC_ID, studentCreditCardService.getStudentsCreditCardById(GENERIC_ID).getId());
+		assertEquals(GENERIC_ID, studentCreditCardService.getStudentCreditCardById(GENERIC_ID).getId());
 	}
 
 	@Test(expected = StudentCreditCardNotFoundException.class)
 	public void shouldThrowAStudentNotFoundExceptionWhenGetStudentsCreditCardById(){
 		when(studentCreditCardRepository.findById(GENERIC_ID)).thenReturn(Optional.empty());
 
-		studentCreditCardService.getStudentsCreditCardById(GENERIC_ID);
+		studentCreditCardService.getStudentCreditCardById(GENERIC_ID);
 	}
 
 	@Test
@@ -111,7 +108,7 @@ public class StudentCreditCardServiceTest {
 
 		when(studentCreditCardRepository.save(any(StudentCreditCard.class))).thenReturn(studentCreditCard);
 
-		assertEquals(GENERIC_ID, studentCreditCardService.createStudentsCreditCard(studentCreditCardRequest).getId());
+		assertEquals(GENERIC_ID, studentCreditCardService.createStudentCreditCard(studentCreditCardRequest).getId());
 	}
 
 	@Test
@@ -124,7 +121,7 @@ public class StudentCreditCardServiceTest {
 
 		when(studentCreditCardRepository.findById(GENERIC_ID)).thenReturn(Optional.of(studentCreditCard));
 
-		studentCreditCardService.updateStudentsCreditCard(GENERIC_ID, studentCreditCardRequest);
+		studentCreditCardService.updateStudentCreditCard(GENERIC_ID, studentCreditCardRequest);
 
 		verify(studentCreditCardRepository, times(1)).save(any());
 	}
@@ -136,7 +133,7 @@ public class StudentCreditCardServiceTest {
 
 		when(studentCreditCardRepository.findById(GENERIC_ID)).thenReturn(Optional.empty());
 
-		studentCreditCardService.updateStudentsCreditCard(GENERIC_ID, studentCreditCardRequest);
+		studentCreditCardService.updateStudentCreditCard(GENERIC_ID, studentCreditCardRequest);
 
 		verify(studentCreditCardRepository, times(0)).save(any());
 	}
@@ -148,7 +145,7 @@ public class StudentCreditCardServiceTest {
 
 		when(studentCreditCardRepository.findById(GENERIC_ID)).thenReturn(Optional.of(studentCreditCard));
 
-		studentCreditCardService.deleteStudentsCreditCard(GENERIC_ID);
+		studentCreditCardService.deleteStudentCreditCard(GENERIC_ID);
 
 		verify(studentCreditCardRepository, times(1)).delete(any());
 	}
@@ -157,7 +154,7 @@ public class StudentCreditCardServiceTest {
 	public void shouldThrowStudentCreditCardNotFoundExceptionWhenDeleteStudentCreditCard(){
 		when(studentCreditCardRepository.findById(GENERIC_ID)).thenReturn(Optional.empty());
 
-		studentCreditCardService.deleteStudentsCreditCard(GENERIC_ID);
+		studentCreditCardService.deleteStudentCreditCard(GENERIC_ID);
 
 		verify(studentCreditCardRepository, times(0)).delete(any());
 	}

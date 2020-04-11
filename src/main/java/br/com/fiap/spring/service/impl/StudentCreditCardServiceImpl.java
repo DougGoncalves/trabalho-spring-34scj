@@ -44,20 +44,20 @@ public class StudentCreditCardServiceImpl implements StudentCreditCardService {
 	}
 
 	@Override
-	public StudentCreditCard getStudentsCreditCardById(Integer id) {
+	public StudentCreditCard getStudentCreditCardById(Integer id) {
 		return studentCreditCardRepository.findById(id).orElseThrow(() ->
 				new StudentCreditCardNotFoundException("Estudante não encontrado"));
 	}
 
 	@Override
-	public StudentCreditCard createStudentsCreditCard(StudentCreditCardRequest studentCreditCardRequest) {
+	public StudentCreditCard createStudentCreditCard(StudentCreditCardRequest studentCreditCardRequest) {
 		return studentCreditCardRepository.save(new StudentCreditCard(studentCreditCardRequest.getRegistration(), studentCreditCardRequest.getName(),
 				studentCreditCardRequest.getCourse(), studentCreditCardRequest.getCardNumber(), studentCreditCardRequest.getExpirationDate(),
 				studentCreditCardRequest.getVerificationCode()));
 	}
 
 	@Override
-	public void updateStudentsCreditCard(Integer id, StudentCreditCardRequest studentCreditCardRequest) {
+	public void updateStudentCreditCard(Integer id, StudentCreditCardRequest studentCreditCardRequest) {
 		updateStudentsCreditCard(getStudent(id, studentCreditCardRequest));
 	}
 
@@ -76,7 +76,7 @@ public class StudentCreditCardServiceImpl implements StudentCreditCardService {
 	}
 
 	@Override
-	public void deleteStudentsCreditCard(Integer id) {
+	public void deleteStudentCreditCard(Integer id) {
 		studentCreditCardRepository.delete(studentCreditCardRepository.findById(id).orElseThrow(() ->
 				new StudentCreditCardNotFoundException("Estudante não encontrado")));
 	}

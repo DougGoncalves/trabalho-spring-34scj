@@ -1,147 +1,222 @@
 package br.com.fiap.spring.controller;
 
-import br.com.fiap.spring.dto.StudentCreditCardItemResponse;
+import br.com.fiap.spring.advice.exceptions.PreRegistrationFailedException;
+import br.com.fiap.spring.advice.exceptions.StudentCreditCardNotFoundException;
 import br.com.fiap.spring.dto.StudentCreditCardRequest;
-import br.com.fiap.spring.dto.StudentCreditCardResponse;
 import br.com.fiap.spring.entity.StudentCreditCard;
 import br.com.fiap.spring.service.StudentCreditCardService;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.google.gson.Gson;
+import org.junit.Before;
+import org.junit.Test;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
+import org.springframework.http.MediaType;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.ResultActions;
+import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 
-import javax.validation.Valid;
-import java.net.URI;
 import java.util.ArrayList;
-import java.util.List;
+import java.util.Collections;
 
-@RestController
-@RequestMapping("/spring/v1/student/credit-card")
-@Api(value = "Gerenciamento de Cartão dos Estudantes")
+import static br.com.fiap.spring.controller.config.RestExceptionHandlerConfig.createExceptionResolver;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.is;
+import static org.junit.Assert.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
 public class StudentCardControllerTest {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(StudentCardControllerTest.class);
+    private MockMvc mvc;
 
+    @Mock
     private StudentCreditCardService studentCreditCardService;
 
-    private static final int HTTP_STATUS_OK = 200;
-    private static final int HTTP_STATUS_CREATED = 201;
-    private static final int HTTP_STATUS_ACCEPTED = 202;
-    private static final int HTTP_STATUS_NO_CONTENT = 204;
-    private static final int PAGE_SIZE = 10;
+    @InjectMocks
+    private StudentCardController studentCardController;
 
-    @Autowired
-    public StudentCardControllerTest(final StudentCreditCardService studentCreditCardService){
-        this.studentCreditCardService = studentCreditCardService;
-    };
-
-    @ApiOperation(value = "Consultar todos os estudantes e os dados de seu cartão")
-    @ApiResponses(value = {
-            @ApiResponse(code = HTTP_STATUS_OK, message = "Lista de estudantes com os respectivos dados de seu cartão",
-                    response = StudentCreditCardResponse[].class)
-    })
-    @GetMapping(produces = "application/json", headers = "Accept=application/json" )
-    public ResponseEntity<StudentCreditCardResponse> getAllStudents(@RequestParam("page") int page,
-                                                                    @RequestParam("size") int size){
-        LOGGER.info("Getting students ... ");
-
-        List<StudentCreditCardItemResponse> studentCreditCardItemResponse = new ArrayList<>();
-        Page<StudentCreditCard> students = studentCreditCardService.getAllStudentsCreditCard(handleRequest(page, size));
-
-        students.getContent().forEach(student -> studentCreditCardItemResponse.add(toStudentResponse(student)));
-
-        return ResponseEntity.ok(new StudentCreditCardResponse(students.hasNext(),
-                getPageNumber(studentCreditCardItemResponse, students), students.getTotalPages(), studentCreditCardItemResponse));
+    @Before
+    public void setUp(){
+        MockitoAnnotations.initMocks(this);
+        mvc = MockMvcBuilders.standaloneSetup(studentCardController)
+                .setHandlerExceptionResolvers(createExceptionResolver())
+                .addFilter(((request, response, chain) -> {
+                    response.setCharacterEncoding("UTF-8");
+                    chain.doFilter(request, response);
+                }))
+                .build();
     }
 
-    @ApiOperation(value = "Consultar um estudante específico com os dados do seu cartão")
-    @ApiResponses(value = {
-            @ApiResponse(code = HTTP_STATUS_OK, message = "Estudante e os respectivos dados de seu cartão",
-                    response = StudentCreditCardResponse.class)
-    })
-    @GetMapping(value = "/{id}", produces = "application/json", headers = "Accept=application/json" )
-    public ResponseEntity<StudentCreditCardItemResponse> getStudentById(@PathVariable("id") Integer id){
-        LOGGER.info("Getting a specific student ... ");
-        return ResponseEntity.ok(toStudentResponse(studentCreditCardService.getStudentsCreditCardById(id)));
+
+    private static Integer GENERIC_ID = 1;
+    private static String STUDENT_REGISTRATION = "1234567";
+    private static final String CARD_NUMBER = "4539711103420778";
+    private static final int VERIFICATION_CODE = 123;
+    private static String NAME = "FULL NAME";
+    private static String COURSE = "001-01";
+    private static String EXPIRATION_DATE = "04/23";
+
+    @Test
+    public void shouldGetAllStudentsCreditCardPaged() throws Exception {
+        StudentCreditCard studentCreditCard = new StudentCreditCard(GENERIC_ID, STUDENT_REGISTRATION, NAME, COURSE,
+                CARD_NUMBER, EXPIRATION_DATE, VERIFICATION_CODE);
+
+        Page<StudentCreditCard> studentCreditCardList = new PageImpl<>(
+                new ArrayList<>(Collections.singletonList(studentCreditCard)));
+
+        when(studentCreditCardService.getAllStudentsCreditCard(any(Pageable.class))).thenReturn(studentCreditCardList);
+
+
+        MockHttpServletRequestBuilder request = MockMvcRequestBuilders
+                .get("/spring/v1/student/credit-card")
+                .param("page", "1")
+                .param("size", "10");
+
+        mvc.perform(request)
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.hasNext", is(Boolean.FALSE)))
+                .andExpect(jsonPath("$.pageNumber", is(1)))
+                .andExpect(jsonPath("$.totalPages", is(1)))
+                .andExpect(jsonPath("$.studentsCreditCard[0].id", is(GENERIC_ID)))
+                .andExpect(jsonPath("$.studentsCreditCard[0].registration", is(STUDENT_REGISTRATION)))
+                .andExpect(jsonPath("$.studentsCreditCard[0].name", is(NAME)))
+                .andExpect(jsonPath("$.studentsCreditCard[0].course", is(COURSE)))
+                .andExpect(jsonPath("$.studentsCreditCard[0].cardNumber", is(CARD_NUMBER)))
+                .andExpect(jsonPath("$.studentsCreditCard[0].expirationDate", is(EXPIRATION_DATE)))
+                .andExpect(jsonPath("$.studentsCreditCard[0].verificationCode", is(VERIFICATION_CODE)));
     }
 
-    @ApiOperation(value = "Excluir um estudante e os e dados do seu cartão")
-    @ApiResponses(value = {
-            @ApiResponse(code = HTTP_STATUS_NO_CONTENT, message = "Dados do cartão do estudante excluído")
-    })
-    @DeleteMapping(value = "/{id}", produces = "application/json", headers = "Accept=application/json" )
-    public ResponseEntity<?> deleteStudent(@PathVariable("id") Integer id){
-        LOGGER.info("Deleting a student credit-card information ... ");
-        studentCreditCardService.deleteStudentsCreditCard(id);
-        return ResponseEntity.noContent().build();
+    @Test
+    public void shouldGetStudentCreditCardById() throws Exception {
+        StudentCreditCard studentCreditCard = new StudentCreditCard(GENERIC_ID, STUDENT_REGISTRATION, NAME, COURSE,
+                CARD_NUMBER, EXPIRATION_DATE, VERIFICATION_CODE);
+
+        when(studentCreditCardService.getStudentCreditCardById(GENERIC_ID)).thenReturn(studentCreditCard);
+
+        MockHttpServletRequestBuilder request = MockMvcRequestBuilders
+                .get("/spring/v1/student/credit-card/{id}", GENERIC_ID);
+
+        mvc.perform(request)
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id", is(GENERIC_ID)))
+                .andExpect(jsonPath("$.registration", is(STUDENT_REGISTRATION)))
+                .andExpect(jsonPath("$.name", is(NAME)))
+                .andExpect(jsonPath("$.course", is(COURSE)))
+                .andExpect(jsonPath("$.cardNumber", is(CARD_NUMBER)))
+                .andExpect(jsonPath("$.expirationDate", is(EXPIRATION_DATE)))
+                .andExpect(jsonPath("$.verificationCode", is(VERIFICATION_CODE)));
     }
 
-    @ApiOperation(value = "Alterar informações de um estudante ou dos dados de seu cartão")
-    @ApiResponses(value = {
-            @ApiResponse(code = HTTP_STATUS_NO_CONTENT, message = "Dados do cartão do estudante atualizados")
-    })
-    @PutMapping(value = "/{id}", produces = "application/json", headers = "Accept=application/json" )
-    public ResponseEntity<?> updateStudent(@PathVariable("id") Integer id,
-                                           @Valid @RequestBody StudentCreditCardRequest studentCreditCardRequest){
-        LOGGER.info("Updating a specific student ... ");
-        studentCreditCardService.updateStudentsCreditCard(id, studentCreditCardRequest);
+    @Test
+    public void shouldDeleteStudentCreditCardById() throws Exception {
+        MockHttpServletRequestBuilder request = MockMvcRequestBuilders
+                .delete("/spring/v1/student/credit-card/{id}", GENERIC_ID);
 
-        return ResponseEntity.noContent().build();
+        mvc.perform(request).andExpect(status().isNoContent());
     }
 
-    @ApiOperation(value = "Associar um estudante a dados de seu cartão")
-    @ApiResponses(value = {
-            @ApiResponse(code = HTTP_STATUS_CREATED, message = "Associação realizada")
-    })
-    @PostMapping(produces = "application/json", headers = "Accept=application/json" )
-    public ResponseEntity<StudentCreditCardItemResponse> createStudent(@Valid @RequestBody StudentCreditCardRequest studentCreditCardRequest){
-        LOGGER.info("Creating the association between student and your credit card ... ");
+    @Test
+    public void shouldUpdateStudentCreditCardById() throws Exception {
+        StudentCreditCardRequest studentCreditCardRequest = new StudentCreditCardRequest(STUDENT_REGISTRATION, NAME,
+                COURSE, CARD_NUMBER, EXPIRATION_DATE, VERIFICATION_CODE);
 
-        StudentCreditCard student = studentCreditCardService.createStudentsCreditCard(studentCreditCardRequest);
+        MockHttpServletRequestBuilder request = MockMvcRequestBuilders
+                .put("/spring/v1/student/credit-card/{id}", GENERIC_ID)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(new Gson().toJson(studentCreditCardRequest));
 
-        return ResponseEntity
-                .created(URI.create(String.format("%s/%s", "/spring/v1/student/credit-card", student.getId())))
-                .body(toStudentResponse(student));
+        mvc.perform(request).andExpect(status().isNoContent());
     }
 
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
-    @ApiOperation(value = "Processar o pré-cadastro")
-    @ApiResponses(value = {
-            @ApiResponse(code = HTTP_STATUS_OK, message = "Pré-cadastro processado")
-    })
-    @PostMapping(value = "/pre-registration", produces = "application/json", headers = "Accept=application/json" )
-    public ResponseEntity<Object> processPreRegistation(){
-        studentCreditCardService.processPreRegistration();
+    @Test
+    public void shouldCreateStudentCreditCard() throws Exception {
+        StudentCreditCard studentCreditCard = new StudentCreditCard(GENERIC_ID, STUDENT_REGISTRATION, NAME, COURSE,
+                CARD_NUMBER, EXPIRATION_DATE, VERIFICATION_CODE);
 
-        return ResponseEntity.ok().build();
+        StudentCreditCardRequest studentCreditCardRequest = new StudentCreditCardRequest(STUDENT_REGISTRATION, NAME,
+                COURSE, CARD_NUMBER, EXPIRATION_DATE, VERIFICATION_CODE);
+
+        when(studentCreditCardService.createStudentCreditCard(any(StudentCreditCardRequest.class)))
+                .thenReturn(studentCreditCard);
+
+        MockHttpServletRequestBuilder request = MockMvcRequestBuilders
+                .post("/spring/v1/student/credit-card/")
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
+                .content(new Gson().toJson(studentCreditCardRequest));
+
+        mvc.perform(request)
+                .andExpect(status().isCreated())
+                .andExpect(header().string("Location", is(String.format("/spring/v1/student/credit-card/%s", GENERIC_ID))))
+                .andExpect(jsonPath("$.id", is(GENERIC_ID)))
+                .andExpect(jsonPath("$.registration", is(STUDENT_REGISTRATION)))
+                .andExpect(jsonPath("$.name", is(NAME)))
+                .andExpect(jsonPath("$.course", is(COURSE)))
+                .andExpect(jsonPath("$.cardNumber", is(CARD_NUMBER)))
+                .andExpect(jsonPath("$.expirationDate", is(EXPIRATION_DATE)))
+                .andExpect(jsonPath("$.verificationCode", is(VERIFICATION_CODE)));
     }
 
-    private PageRequest handleRequest(Integer page, Integer size) {
-        return PageRequest.of(page != 0 ? page -1 : 0, size != 0 ? size : PAGE_SIZE);
+    @Test
+    public void shouldProcessPreRegistation() throws Exception {
+        MockHttpServletRequestBuilder request = MockMvcRequestBuilders
+                .post("/spring/v1/student/credit-card/pre-registration");
+
+        mvc.perform(request).andExpect(status().isOk());
     }
 
-    private int getPageNumber(List<StudentCreditCardItemResponse> studentCreditCardItemResponse, Page<StudentCreditCard> students) {
-        return studentCreditCardItemResponse.size() > 0 ? students.getNumber() + 1 : 0;
+    @Test
+    public void shouldReturnInternalServerErrorWhenProcessPreRegistation() throws Exception {
+        doThrow(PreRegistrationFailedException.class).when(studentCreditCardService).processPreRegistration();
+
+        MockHttpServletRequestBuilder request = MockMvcRequestBuilders
+                .post("/spring/v1/student/credit-card/pre-registration");
+
+        ResultActions resultActions = mvc.perform(request);
+
+        resultActions.andExpect(status().isInternalServerError());
+        assertThat(resultActions.andReturn().getResponse().getContentAsString(), containsString("message"));
     }
 
-    private StudentCreditCardItemResponse toStudentResponse(StudentCreditCard student) {
-        return new StudentCreditCardItemResponse(student.getId(), student.getRegistration(), student.getName(), student.getCourse(),
-                student.getCardNumber(), student.getExpirationDate(), student.getVerificationCode());
+    @Test
+    public void shouldReturnPreConditionFaildeWhenDeleteStudentCreditCardById() throws Exception {
+        doThrow(StudentCreditCardNotFoundException.class).when(studentCreditCardService).deleteStudentCreditCard(GENERIC_ID);
+
+        MockHttpServletRequestBuilder request = MockMvcRequestBuilders
+                .delete("/spring/v1/student/credit-card/{id}", GENERIC_ID);
+
+        ResultActions resultActions = mvc.perform(request);
+
+        resultActions.andExpect(status().isPreconditionFailed());
+        assertThat(resultActions.andReturn().getResponse().getContentAsString(), containsString("message"));
     }
-}
+
+    @Test
+    public void shouldReturnBadRequestWhenUpdateStudentCreditCardById() throws Exception {
+        StudentCreditCardRequest studentCreditCardRequest = new StudentCreditCardRequest(STUDENT_REGISTRATION, NAME,
+                COURSE, "1234567812345678", EXPIRATION_DATE, VERIFICATION_CODE);
+
+        MockHttpServletRequestBuilder request = MockMvcRequestBuilders
+                .put("/spring/v1/student/credit-card/{id}", GENERIC_ID)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(new Gson().toJson(studentCreditCardRequest));
+
+        ResultActions resultActions = mvc.perform(request);
+
+        resultActions.andExpect(status().isBadRequest());
+        assertThat(resultActions.andReturn().getResponse().getContentAsString(), containsString("message"));
+    }
+ }

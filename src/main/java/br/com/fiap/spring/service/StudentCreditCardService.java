@@ -7,9 +7,9 @@ import org.springframework.data.domain.Pageable;
 
 public interface StudentCreditCardService {
 	Page<StudentCreditCard> getAllStudentsCreditCard(Pageable pageable);
-	StudentCreditCard getStudentsCreditCardById(Integer id);
-	StudentCreditCard createStudentsCreditCard(StudentCreditCardRequest studentCreditCardRequest);
-	void updateStudentsCreditCard(Integer id, StudentCreditCardRequest studentCreditCardRequest);
-	void deleteStudentsCreditCard(Integer id);
+	StudentCreditCard getStudentCreditCardById(Integer id);
+	StudentCreditCard createStudentCreditCard(StudentCreditCardRequest studentCreditCardRequest);
+	void updateStudentCreditCard(Integer id, StudentCreditCardRequest studentCreditCardRequest);
+	void deleteStudentCreditCard(Integer id);
 	void processPreRegistration();
 }

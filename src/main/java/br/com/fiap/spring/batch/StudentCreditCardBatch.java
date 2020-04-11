@@ -39,7 +39,7 @@ public class StudentCreditCardBatch {
                 .processor(processor)
                 .writer(itemWriter)
                 .listener(listener())
-                .allowStartIfComplete(true)
+                .allowStartIfComplete(false)
                 .build();
     }
 
