@@ -11,6 +11,8 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
+import org.springframework.security.access.AccessDeniedException;
+
 @ControllerAdvice
 public class RestExceptionHandler {
 
@@ -27,6 +29,16 @@ public class RestExceptionHandler {
                 .status(responseError.getStatus())
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(getBody(responseError));
+    }
+
+    @ExceptionHandler({
+            AccessDeniedException.class
+    })
+    public final ResponseEntity<?> handleAccessDeniedExceptions(RuntimeException ex) {
+        return ResponseEntity
+                .status(HttpStatus.FORBIDDEN)
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(getBody(ex));
     }
 
     @ExceptionHandler({
