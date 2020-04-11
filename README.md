@@ -95,6 +95,16 @@ Execute os comandos abaixo para realização das funções correspondentes:
 ```mvn test```
 ![](coverage.gif)
 
+> Para executar a inspeção de qualidade do código com sonarQube
+1. Execute o container 
+```docker run -d -p 9000:9000 sonarqube```
+2. Siga os procedimentos do documento anexo Sonar - Configuração.pdf, ou se preferir pule o passo seguinte e informe o seguinte comando:
+```mvn sonar:sonar -Dsonar.host.url=http://localhost:9000 -Dsonar.login=admin -Dsonar.password=admin```
+3. Por fim execute o seguinte comando no terminal, informando no parâmetro de login o token gerado no passo anterior:
+```mvn sonar:sonar -Dsonar.host.url=http://localhost:9000 -Dsonar.login=e288297d122511887ca9a6e216ab5fdbbd41cc82```
+4. Será gerada uma url, confome o exemplo abaixo que demonstrará o relatório gerado.
+![](sonar-scan.png)
+
 ## Trabalhos futuros: 
 - Desenvolver telas para facilitar o trabalho dos operadores.
 - Desenvolver um cadastro de alunos assim como um cadastro de cartões de crédito isoladamente, e refatorar o gerenciamento de associação de cartão a um aluno para tratar apenas com os identificadores. 

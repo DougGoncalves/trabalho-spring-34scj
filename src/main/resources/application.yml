@@ -23,3 +23,16 @@ hibernate:
 
 file:
   input: classpath:students_pre_registration.txt
+
+sonar:
+  projectKey: spring-service
+  projectName: Spring Service
+  projectVersion: 1.0
+  sources: src
+  language: java
+  binaries: build/classes
+  tests: junit
+  dynamicAnalysis: reuseReports
+  junit.reportsPath: build/test-reports
+  java.coveragePlugin: jacoco
+  jacoco.reportPath: target/jacoco.exec
