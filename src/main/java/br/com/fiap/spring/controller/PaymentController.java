@@ -24,7 +24,7 @@ import javax.validation.Valid;
 @Api(value = "Gerenciamento de Transações/Pagamento")
 public class PaymentController {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(StudentCardController.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(PaymentController.class);
 
     private PaymentService paymentService;
 

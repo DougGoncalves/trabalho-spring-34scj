@@ -9,6 +9,8 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -29,15 +31,12 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 @RestController
 @RequestMapping("/spring/v1/student/credit-card")
 @Api(value = "Gerenciamento de Cartão dos Estudantes")
-public class StudentCardController {
+public class StudentCardControllerTest {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(StudentCardController.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(StudentCardControllerTest.class);
 
     private StudentCreditCardService studentCreditCardService;
 
@@ -48,7 +47,7 @@ public class StudentCardController {
     private static final int PAGE_SIZE = 10;
 
     @Autowired
-    public StudentCardController(final StudentCreditCardService studentCreditCardService){
+    public StudentCardControllerTest(final StudentCreditCardService studentCreditCardService){
         this.studentCreditCardService = studentCreditCardService;
     };
 

@@ -5,12 +5,10 @@ import org.springframework.http.HttpStatus;
 
 public class ResponseError extends RuntimeException {
 
-    private static final long serialVersionUID = 1L;
-
     @JsonIgnore
-    private HttpStatus status;
+    HttpStatus status;
 
-    private String message;
+    String message;
 
     public ResponseError(String message){
         this.status = HttpStatus.INTERNAL_SERVER_ERROR;

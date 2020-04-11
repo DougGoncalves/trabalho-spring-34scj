@@ -25,6 +25,19 @@ public class StudentCreditCardRequest {
     @NotNull
     private Integer verificationCode;
 
+    public StudentCreditCardRequest() {
+    }
+
+    public StudentCreditCardRequest(String registration, String name, String course, String cardNumber,
+                                    String expirationDate, Integer verificationCode) {
+        this.registration = registration;
+        this.name = name;
+        this.course = course;
+        this.cardNumber = cardNumber;
+        this.expirationDate = expirationDate;
+        this.verificationCode = verificationCode;
+    }
+
     public String getRegistration() {
         return registration;
     }

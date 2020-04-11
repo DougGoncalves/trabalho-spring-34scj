@@ -1,4 +1,4 @@
-package br.com.fiap.spring.config;
+package br.com.fiap.spring.batch.config;
 
 import org.springframework.batch.test.JobLauncherTestUtils;
 import org.springframework.context.annotation.Bean;

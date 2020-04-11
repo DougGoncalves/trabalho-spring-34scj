@@ -1,5 +1,8 @@
 package br.com.fiap.spring.advice;
 
+import br.com.fiap.spring.advice.exceptions.PreRegistrationFailedException;
+import br.com.fiap.spring.advice.exceptions.StudentCreditCardConflictException;
+import br.com.fiap.spring.advice.exceptions.StudentCreditCardNotFoundException;
 import com.google.gson.JsonObject;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -11,7 +14,10 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 @ControllerAdvice
 public class RestExceptionHandler {
 
-    @ExceptionHandler(Exception.class)
+    @ExceptionHandler({
+            Exception.class,
+            PreRegistrationFailedException.class
+    })
     public final ResponseEntity<?> handleGenericExceptions(Exception ex) {
         ResponseError responseError = new ResponseError(
                 HttpStatus.INTERNAL_SERVER_ERROR,
@@ -23,10 +29,32 @@ public class RestExceptionHandler {
                 .body(getBody(responseError));
     }
 
-    @ExceptionHandler(ResponseError.class)
-    public final ResponseEntity<?> handleResponseErrorException(ResponseError ex) {
+    @ExceptionHandler({
+            StudentCreditCardConflictException.class
+    })
+    public final ResponseEntity<?> handleConflictExceptions(RuntimeException ex) {
         return ResponseEntity
-                .status(ex.getStatus())
+                .status(HttpStatus.CONFLICT)
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(getBody(ex));
+    }
+
+    @ExceptionHandler({
+            StudentCreditCardNotFoundException.class
+    })
+    public final ResponseEntity<?> handlePreConditionFailedExceptions(RuntimeException ex) {
+        return ResponseEntity
+                .status(HttpStatus.PRECONDITION_FAILED)
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(getBody(ex));
+    }
+
+    @ExceptionHandler({
+            ResponseError.class
+    })
+    public final ResponseEntity<?> handleUnprocessableEntityExceptions(RuntimeException ex) {
+        return ResponseEntity
+                .status(HttpStatus.UNPROCESSABLE_ENTITY)
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(getBody(ex));
     }

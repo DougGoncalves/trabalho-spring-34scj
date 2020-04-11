@@ -82,6 +82,16 @@ Caso deseje verificar as rotas mapeadas pela aplicação, você pode utilizar a 
 Para realizar o teste da aplicação via interface gráfica do swagger, você deve subir a aplicação desejada via docker, ou utilizando o código fonte presente neste repositório, diretamente por meio de uma IDE como Eclipse ou IntelliJ, e acessar a seguinte url de exemplo: http://localhost:8080/swagger-ui.html.
 ![](swagger-example.png)
 
+### Outras informações
+Execute os comandos abaixo para realização das funções correspondentes:
+> Para realizar o download das dependências do projeto ```mvn install``` 
+
+> Subir a aplicação localmente na porta 8080:
+```mvn spring-boot:run``` 
+
+> Para executar os testes da aplicação:
+```mvn test```
+
 
 ## Trabalhos futuros: 
 - Desenvolver telas para facilitar o trabalho dos operadores.

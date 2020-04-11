@@ -19,8 +19,7 @@ hibernate:
   dialect: org.hibernate.dialect.H2Dialect
   show_sql: true
   format_sql: true
-  hbm2ddl.auto: create-drop
-
+  hbm2ddl.auto: validate
 
 file:
   input: classpath:students_pre_registration.txt

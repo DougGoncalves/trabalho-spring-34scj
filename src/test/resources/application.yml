@@ -1,8 +1,21 @@
+spring:
+  batch:
+    job:
+      enabled: false
+  main:
+    allow-bean-definition-overriding: true
+
 database:
   driverClassName: org.h2.Driver
   url: jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1
   username: fiap
   password: fiap
+
+hibernate:
+  dialect: org.hibernate.dialect.H2Dialect
+  show_sql: true
+  format_sql: true
+  hbm2ddl.auto: create-drop
 
 file:
   input: classpath:students_pre_registration.txt

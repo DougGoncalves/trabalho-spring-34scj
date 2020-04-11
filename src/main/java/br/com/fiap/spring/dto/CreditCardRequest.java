@@ -12,6 +12,14 @@ public class CreditCardRequest {
     @NotNull
     private Integer verificationCode;
 
+    public CreditCardRequest() {
+    }
+
+    public CreditCardRequest(String cardNumber, Integer verificationCode) {
+        this.cardNumber = cardNumber;
+        this.verificationCode = verificationCode;
+    }
+
     public String getCardNumber() {
         return cardNumber;
     }

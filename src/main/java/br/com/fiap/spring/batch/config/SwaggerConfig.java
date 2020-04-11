@@ -1,4 +1,4 @@
-package br.com.fiap.spring.config;
+package br.com.fiap.spring.batch.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

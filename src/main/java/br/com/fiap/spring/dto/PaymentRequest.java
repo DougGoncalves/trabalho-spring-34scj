@@ -13,11 +13,22 @@ public class PaymentRequest {
     private BigDecimal totalOrderAmount;
 
     @NotNull
-    private String studentId;
+    private String studentRegistration;
 
     @Valid
     @NotNull
     private CreditCardRequest creditCard;
+
+    public PaymentRequest() {
+    }
+
+    public PaymentRequest(Integer orderId, BigDecimal totalOrderAmount, String studentRegistration,
+                          CreditCardRequest creditCard) {
+        this.orderId = orderId;
+        this.totalOrderAmount = totalOrderAmount;
+        this.studentRegistration = studentRegistration;
+        this.creditCard = creditCard;
+    }
 
     public Integer getOrderId() {
         return orderId;
@@ -35,12 +46,12 @@ public class PaymentRequest {
         this.totalOrderAmount = totalOrderAmount;
     }
 
-    public String getStudentId() {
-        return studentId;
+    public String getStudentRegistration() {
+        return studentRegistration;
     }
 
-    public void setStudentId(String studentId) {
-        this.studentId = studentId;
+    public void setStudentRegistration(String studentRegistrationId) {
+        this.studentRegistration = studentRegistrationId;
     }
 
     public CreditCardRequest getCreditCard() {

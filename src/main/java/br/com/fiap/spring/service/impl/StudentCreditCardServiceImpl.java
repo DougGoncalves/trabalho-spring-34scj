@@ -1,6 +1,7 @@
 package br.com.fiap.spring.service.impl;
 
-import br.com.fiap.spring.advice.ResponseError;
+import br.com.fiap.spring.advice.exceptions.PreRegistrationFailedException;
+import br.com.fiap.spring.advice.exceptions.StudentCreditCardNotFoundException;
 import br.com.fiap.spring.dto.StudentCreditCardRequest;
 import br.com.fiap.spring.entity.StudentCreditCard;
 import br.com.fiap.spring.repository.StudentCreditCardRepository;
@@ -14,7 +15,6 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.util.stream.Collectors;
@@ -23,7 +23,7 @@ import java.util.stream.Collectors;
 public class StudentCreditCardServiceImpl implements StudentCreditCardService {
 
 	@Autowired
-	private StudentCreditCardRepository studentRepository;
+	private StudentCreditCardRepository studentCreditCardRepository;
 
 	@Autowired
 	@Qualifier("studentCreditCardJob")
@@ -34,36 +34,36 @@ public class StudentCreditCardServiceImpl implements StudentCreditCardService {
 	private JobLauncher jobLauncher;
 
 	@Override
-	public Page<StudentCreditCard> getAllStudents(Pageable pageable) {
+	public Page<StudentCreditCard> getAllStudentsCreditCard(Pageable pageable) {
 
-		long count = studentRepository.count();
-		Page<StudentCreditCard> students = studentRepository.findAll(pageable);
+		long count = studentCreditCardRepository.count();
+		Page<StudentCreditCard> students = studentCreditCardRepository.findAll(pageable);
 
 		return new PageImpl<>(students.stream().collect(Collectors.toList()),
 				students.getPageable(), count);
 	}
 
 	@Override
-	public StudentCreditCard getStudentById(Integer id) {
-		return studentRepository.findById(id).orElseThrow(() ->
-				new ResponseError(HttpStatus.NOT_FOUND, "Estudante não encontrado"));
+	public StudentCreditCard getStudentsCreditCardById(Integer id) {
+		return studentCreditCardRepository.findById(id).orElseThrow(() ->
+				new StudentCreditCardNotFoundException("Estudante não encontrado"));
 	}
 
 	@Override
-	public StudentCreditCard createStudent(StudentCreditCardRequest studentCreditCardRequest) {
-		return studentRepository.save(new StudentCreditCard(studentCreditCardRequest.getRegistration(), studentCreditCardRequest.getName(),
+	public StudentCreditCard createStudentsCreditCard(StudentCreditCardRequest studentCreditCardRequest) {
+		return studentCreditCardRepository.save(new StudentCreditCard(studentCreditCardRequest.getRegistration(), studentCreditCardRequest.getName(),
 				studentCreditCardRequest.getCourse(), studentCreditCardRequest.getCardNumber(), studentCreditCardRequest.getExpirationDate(),
 				studentCreditCardRequest.getVerificationCode()));
 	}
 
 	@Override
-	public void updateStudent(Integer id, StudentCreditCardRequest studentCreditCardRequest) {
-		updateStudent(getStudent(id, studentCreditCardRequest));
+	public void updateStudentsCreditCard(Integer id, StudentCreditCardRequest studentCreditCardRequest) {
+		updateStudentsCreditCard(getStudent(id, studentCreditCardRequest));
 	}
 
-	private void updateStudent(StudentCreditCard student) {
-		StudentCreditCard storedStudent = studentRepository.findById(student.getId())
-				.orElseThrow(() -> new ResponseError(HttpStatus.NOT_FOUND, "Estudante não encontrado"));
+	private void updateStudentsCreditCard(StudentCreditCard student) {
+		StudentCreditCard storedStudent = studentCreditCardRepository.findById(student.getId())
+				.orElseThrow(() -> new StudentCreditCardNotFoundException("Estudante não encontrado"));
 
 		storedStudent.setName(student.getName());
 		storedStudent.setRegistration(student.getRegistration());
@@ -72,13 +72,13 @@ public class StudentCreditCardServiceImpl implements StudentCreditCardService {
 		storedStudent.setExpirationDate(student.getExpirationDate());
 		storedStudent.setVerificationCode(student.getVerificationCode());
 
-		studentRepository.save(storedStudent);
+		studentCreditCardRepository.save(storedStudent);
 	}
 
 	@Override
-	public void deleteStudent(Integer id) {
-		studentRepository.delete(studentRepository.findById(id).orElseThrow(() ->
-				new ResponseError(HttpStatus.NOT_FOUND, "Estudante não encontrado")));
+	public void deleteStudentsCreditCard(Integer id) {
+		studentCreditCardRepository.delete(studentCreditCardRepository.findById(id).orElseThrow(() ->
+				new StudentCreditCardNotFoundException("Estudante não encontrado")));
 	}
 
 	@Override
@@ -88,8 +88,8 @@ public class StudentCreditCardServiceImpl implements StudentCreditCardService {
 			System.out.println("Job Status : " + execution.getStatus());
 			System.out.println("Job completed");
 		} catch (Exception e) {
-			e.printStackTrace();
 			System.out.println("Job failed");
+			throw new PreRegistrationFailedException("Ocorreu um erro durante o processamento do arquivo de carga.");
 		}
 	}
 
@@ -98,5 +98,4 @@ public class StudentCreditCardServiceImpl implements StudentCreditCardService {
 				studentCreditCardRequest.getCourse(), studentCreditCardRequest.getCardNumber(), studentCreditCardRequest.getExpirationDate(),
 				studentCreditCardRequest.getVerificationCode());
 	}
-
 }
