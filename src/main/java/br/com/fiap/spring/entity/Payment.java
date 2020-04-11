@@ -14,7 +14,6 @@ import javax.persistence.Id;
 import javax.persistence.SequenceGenerator;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.Date;
 
 @Entity(name = "PAYMENT")
 @EntityListeners(AuditingEntityListener.class)
@@ -22,7 +21,7 @@ public class Payment {
 
     @Id
     @GeneratedValue(generator = "generator", strategy = GenerationType.SEQUENCE)
-    @SequenceGenerator(initialValue = 11, name = "generator", sequenceName = "payment_sequence")
+    @SequenceGenerator(initialValue = 11, allocationSize = 1, name = "generator", sequenceName = "payment_sequence")
     @Column(name = "PAYMENT_ID")
     private Integer id;
 

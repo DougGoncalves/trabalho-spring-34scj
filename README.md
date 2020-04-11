@@ -38,6 +38,8 @@ Requisito não funcionais:
 
 ## Exemplo de Funcionamento
 ![](example.gif)
+Observações: O acesso a rota do console do banco de dados /db e a rota de execução do job de pré-cadastro  /spring/v1/student/credit-card/pre-registration,
+somente são autorizadas para usuários com a role de administrador. Para o exemplo um navegador será acessado com usuário com role de administrador e o outro navegador será acessado com role de usuário.
 
 ## Funcionalidades:
 
@@ -69,7 +71,7 @@ Requisito não funcionais:
 
 ### Actuator:
 
-A API desenvolvida possui a dependência do Spring Boot Actuator e dessa forma, caso você deseje listar todas as rotas disponíveis, ou ainda verificar informações adicionais sobre o estado da aplciação ou métricas, você deverá informar as seguintes url's no navegador: 
+A API desenvolvida possui a dependência do Spring Boot Actuator e dessa forma, caso você deseje listar todas as rotas disponíveis, ou ainda verificar informações adicionais sobre o estado da aplicação ou métricas, você deverá informar as seguintes url's no navegador: 
 
 Para listar todas as informações disponibilizadas pela biblioteca do Spring Boot Actuator, informe a url: http://localhost:8080/actuator
 
@@ -80,7 +82,7 @@ Caso deseje verificar as rotas mapeadas pela aplicação, você pode utilizar a 
 
 ### Testando a aplicação via Swagger:
 Para realizar o teste da aplicação via interface gráfica do swagger, você deve subir a aplicação desejada via docker, ou utilizando o código fonte presente neste repositório, diretamente por meio de uma IDE como Eclipse ou IntelliJ, e acessar a seguinte url de exemplo: http://localhost:8080/swagger-ui.html.
-![](swagger-example.png)
+![](swagger.png)
 
 ### Outras informações
 Execute os comandos abaixo para realização das funções correspondentes:
@@ -91,7 +93,7 @@ Execute os comandos abaixo para realização das funções correspondentes:
 
 > Para executar os testes da aplicação:
 ```mvn test```
-
+![](coverage.gif)
 
 ## Trabalhos futuros: 
 - Desenvolver telas para facilitar o trabalho dos operadores.

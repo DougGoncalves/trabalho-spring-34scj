@@ -12,7 +12,7 @@ public class StudentCreditCard {
 
     @Id
     @GeneratedValue(generator = "generator", strategy = GenerationType.SEQUENCE)
-    @SequenceGenerator(name = "generator", sequenceName = "student_credit_card_sequence")
+    @SequenceGenerator(name = "generator", allocationSize = 1, sequenceName = "student_credit_card_sequence")
     @Column
     private Integer id;
     @Column(name = "REGISTRATION_CODE")
